@@ -14,6 +14,8 @@ public interface IStorage {
 
     public int createBucket();
 
+    public boolean setupMode();
+
     public Bucket createEmptyBucket();
 
     public void addObjects(Bucket bucket);

@@ -36,11 +36,11 @@ public class CloudStorageJavaUI {
 
                     //Authenticate project_id and credentials
                     CloudStorageSDK sdk_mode = new CloudStorageSDK(credentials_path, project_id);
-                    int sdk_return_code = setupSdkMode(sdk_mode);
+                    int sdk_return_code = setupSelectedMode(sdk_mode);
                     continue;
                 case "api":
-                    //TODO
-                    System.out.println("Using API");
+                    CloudStorageAPI api_mode = new CloudStorageAPI(credentials_path, project_id);
+                    int api_return_code = setupSelectedMode(api_mode);
                     continue;
                 case "quit":
                     System.out.println("Thanks for using the Google Cloud Storage Bucket Manager");
@@ -51,14 +51,14 @@ public class CloudStorageJavaUI {
 
     }
 
-    static int setupSdkMode(CloudStorageSDK sdkMode) {
+    static int setupSelectedMode (IStorage mode) {
         boolean continue_sdk_mode = true;
         int status_code = -1;
 
-        if (sdkMode.setupSDK()) {
+        if (mode.setupMode()) {
             while (continue_sdk_mode) {
 
-                List<String> sdk_options = new ArrayList<>(Arrays.asList("split", "merge", "create", "exit"));
+                List<String> options = new ArrayList<>(Arrays.asList("split", "merge", "create", "exit"));
                 System.out.println("What would you like to do?");
                 System.out.println("----- Split -----");
                 System.out.println("----- Merge -----");
@@ -67,18 +67,18 @@ public class CloudStorageJavaUI {
                 System.out.println("Type 'split', 'merge', 'create' or 'exit' and hit ENTER");
 
                 String user_choice = Keyboard.readInput().toLowerCase();
-                boolean choice_validation = Helpers.validateStringInput(sdk_options, user_choice);
+                boolean choice_validation = Helpers.validateStringInput(options, user_choice);
 
                 if (choice_validation) {
                     switch (user_choice) {
                         case "create":
-                            continue_sdk_mode = createBucketUI(sdkMode, continue_sdk_mode);
+                            continue_sdk_mode = createBucketUI(mode, continue_sdk_mode);
                             break;
                         case "split":
-                            continue_sdk_mode = sdkMode.splitBucket();
+                            continue_sdk_mode = mode.splitBucket();
                             break;
                         case "merge":
-                            continue_sdk_mode = sdkMode.mergeBuckets();
+                            continue_sdk_mode = mode.mergeBuckets();
                             break;
                         case "exit":
                             continue_sdk_mode = false;
@@ -100,34 +100,34 @@ public class CloudStorageJavaUI {
         }
     }
 
-    public static boolean createBucketUI(CloudStorageSDK sdkMode, boolean continue_sdk_mode) {
-        int status = sdkMode.createBucket();
+    public static boolean createBucketUI(IStorage mode, boolean continue_sdk_mode) {
+        int status = mode.createBucket();
 
         if (status == 0) {
 
-            continue_sdk_mode = continueSDKMode(continue_sdk_mode);
+            continue_sdk_mode = continueMode(continue_sdk_mode);
         }
         return continue_sdk_mode;
     }
 
-    public static boolean continueSDKMode(boolean continue_sdk_mode) {
+    public static boolean continueMode(boolean continue_mode) {
         String continue_sdk = "";
         List<String> valid_inputs = new ArrayList<>();
         valid_inputs.add("yes");
         valid_inputs.add("no");
         boolean valid_mode_continue = false;
         while (!valid_mode_continue) {
-            System.out.print("Would you like to continue in SDK mode? Type 'Yes' or 'No' and hit ENTER:  ");
+            System.out.print("Would you like to continue in mode? Type 'Yes' or 'No' and hit ENTER:  ");
             continue_sdk = Keyboard.readInput().toLowerCase();
             valid_mode_continue = Helpers.validateStringInput(valid_inputs, continue_sdk);
         }
 
         if (!continue_sdk.equals("yes")) {
-            continue_sdk_mode = false;
+            continue_mode = false;
         } else {
-            continue_sdk_mode = true;
+            continue_mode = true;
         }
-        return continue_sdk_mode;
+        return continue_mode;
     }
 
 

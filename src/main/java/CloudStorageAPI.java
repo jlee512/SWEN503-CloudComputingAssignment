@@ -46,6 +46,11 @@ public class CloudStorageAPI implements IStorage {
     }
 
     @Override
+    public boolean setupMode() {
+        return false;
+    }
+
+    @Override
     public List<String> getBucketNames() {
         return null;
     }

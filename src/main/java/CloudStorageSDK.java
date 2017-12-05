@@ -4,7 +4,6 @@ import com.google.cloud.storage.*;
 
 import javax.swing.*;
 import java.io.*;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +33,7 @@ public class CloudStorageSDK implements IStorage {
         return project_id;
     }
 
-    public boolean setupSDK() {
+    public boolean setupMode() {
         builder = StorageOptions.newBuilder();
         //Set project_id
         builder.setProjectId(project_id);
@@ -113,13 +112,14 @@ public class CloudStorageSDK implements IStorage {
 
         String name = Helpers.getBucketNameFromUser();
         String region = Helpers.getBucketRegionFromUser();
+        StorageClass storageClass = Helpers.getStorageClassFromUser();
 
         System.out.println("Attempting to create a bucket named: " + name + " in " + region);
 
         try {
             Bucket bucket = storage.create(BucketInfo.newBuilder(name)
                     // See here for possible values: http://g.co/cloud/storage/docs/storage-classes
-                    .setStorageClass(StorageClass.COLDLINE)
+                    .setStorageClass(storageClass)
                     // Possible values: http://g.co/cloud/storage/docs/bucket-locations#location-mr
                     .setLocation(region)
                     .build());
@@ -283,7 +283,7 @@ public class CloudStorageSDK implements IStorage {
             System.out.println("Cleaning-up original bucket");
             deleteBucket(buckets.get(selected_bucket).getName());
 
-            return CloudStorageJavaUI.continueSDKMode(false);
+            return CloudStorageJavaUI.continueMode(false);
         }
     }
 
@@ -374,7 +374,7 @@ public class CloudStorageSDK implements IStorage {
                 deleteBucket(bucketName);
             }
 
-            return CloudStorageJavaUI.continueSDKMode(false);
+            return CloudStorageJavaUI.continueMode(false);
         }
     }
 
