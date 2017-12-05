@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "swen503-cloudcomputing",
+  "private_key_id": "0e8b6744055c563190ae7c901311181ce186c3fc",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQCTYGFrbVdOjcnq\nMP2P73PhR6OjBnLuQqbSc8fpWSsn2T5mbTjHdGRZrZh5n7AOBzbORbdB76UpYFyb\nghddJ/LbVw9rOFpPoOxn6r4HyRtpQEtXCfWCoe8W42stE69IgdBqjaCWJHymcNuW\ncMhx0QIsVO0L5q2pADR7GP9MNcZ7dLgIF3R/Z4SwjASCIOIME3y/5PbswHT96mnl\nVDQm+Q/JesBr36UbnnTg45TxA2mAd7nIEVfQN0mFPOwXPX3UdQkWVacZM4UDGbdL\nFmfvBXNPCkS60uy3dDkSMmyXowq1Zx+F6C4e463wyv2MxAfRb6A6o5XOd8JczCZG\nuJBBf1QxAgMBAAECgf97C2axOoKnCadUtov9NsuZGybg+OsCe8N5K6smhO9Zcpew\nP+1X5mVvBvDdGrLy0DMbcdML/Sxedbjb9qsEq+xBSCUnb87dcyeHQdLGzUrr5TI0\n/HhuSKUShwb3uHRwJQuaHgTyIvFJEip3JrkzzaOMcwHQURhMl+jS0PWiiBze+2w2\nc4g4JcFT2PvBiABbh2uvhIo4/S/tjQHqxl5hOldAgO41POpLXn4hfzxgMh1Rkams\n5W/4WAgy6b0T7B5d/sOX/zLa5X7AH8mZMDENQ5ZCssT7eVjJHzea14adaTcGOBor\ngbFoghFxRuilrZA2x1efZot+mFUMFJjidsCphAECgYEAzOM8kowlXjU48bHtmn5t\n7NDkMXP7oVcN7kIHMF64JfBnFtejsWOCxGkpUipGvr3/LaW+T8Wuc7U3BRT8xXg5\nEqqV1uzAAFrxYKYXaCwNKNfK5nqO/uZ/eS3QyZEUa5SI7WWHfd3egoZOf7pA5FPz\nYzowFf/hKvg2m+jqVaNtFAECgYEAuCRNYH7oh9t0PM3v3k0Y+Yp/U3HB5UDMimiO\n7AgYw8jDrMyM5BCjpbArAdjUbHXdpKY+WvMRA8EWV13tEBtM+ld+mxjMoQ/MTqcP\nsH+qaCuJ5Bc4j3+T5QjbOsjzGv3LIpWBU3ymoxVkszZQZvJwNWUCXhTv4VEyFzOW\nVxeegDECgYBiRMcDntY5ZhuGyQkmJWeBwvr/wRo6Wu+ii+a4y2VVRQWczhaD+S96\nFtorv30o9SXT9f/ecPjoJE1cUaGe8Lem/UxaxjicswG8kkz9uMsjAMUfYD7/gPw4\n2cGfO8dohdhazGx88RJM1jAGUQXYvW8p83mmw5BytJQ0mTTzmCu0AQKBgQCZsVMT\n81jJ7BU8mvZWKStrPHnBf/VCD6+o5lREFQ32e582nxQJVwn/xOZgiEXksQvp3Qe2\niaHt7D9ldHPlOaQqXtTBRxWkaLcx/qZNvoDQqWZSBj+jJeyfAaFZk1e1c5cUqoxi\nzmuXOsft/KtnAXs+VayAMiF1gnu4ecpFruUQQQKBgEvpsXdCMb+uEr6T99wHIb1c\nTQ6Ks0EkSn98KxMKyKuA7MYDYNsk5NAit+w0q/9DTU6tkoDqNYRdjxGD8fjWiDBm\nCNC9Idxxa5O0w10V6coImbDvrkILD/5b8wWMzJyrwokWImh8P4zZ5kb7Rp//Swet\nsk/GVnv4g0TmRAXwvEWd\n-----END PRIVATE KEY-----\n",
+  "client_email": "swen503-service-account@swen503-cloudcomputing.iam.gserviceaccount.com",
+  "client_id": "102476172151693495203",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/swen503-service-account%40swen503-cloudcomputing.iam.gserviceaccount.com"
+}
