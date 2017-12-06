@@ -317,7 +317,8 @@ public class CloudStorageAPI implements IStorage {
 
         String uri = null;
         try {
-            uri = "https://www.googleapis.com/storage/v1/b/sourceBucket/o/sourceObject/copyTo/b/destinationBucket/o/destinationObject";
+            uri = "https://www.googleapis.com/upload/storage/v1/b/" + bucketname + "/o?uploadType=media&name=" + file.getName();
+            System.out.println(uri);
 
             System.out.println();
 
@@ -346,6 +347,7 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
+            e.printStackTrace();
         }
         return false;
     }
