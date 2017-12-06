@@ -63,7 +63,6 @@ public class CloudStorageSDK implements IStorage {
 
     }
 
-    @Override
     public List<Bucket> getBucketList() {
         Page<Bucket> buckets = storage.list(Storage.BucketListOption.pageSize(100), Storage.BucketListOption.prefix(""));
         List<Bucket> bucket_list = new ArrayList<>();
@@ -226,7 +225,7 @@ public class CloudStorageSDK implements IStorage {
             return false;
         } else {
             System.out.println("Please select a bucket to split");
-            int selected_bucket = Helpers.getNumericalInput(0, 0, false) - 1;
+            int selected_bucket = Helpers.getNumericalInput(buckets.size(), 1, true) - 1;
             System.out.println("Splitting: " + buckets.get(selected_bucket).getName());
 
 

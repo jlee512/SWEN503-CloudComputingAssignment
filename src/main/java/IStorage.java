@@ -10,8 +10,6 @@ public interface IStorage {
 
     public List<String> getBucketNames();
 
-    public List<Bucket> getBucketList();
-
     public int createBucket();
 
     public boolean setupMode();

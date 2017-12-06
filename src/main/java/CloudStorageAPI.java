@@ -3,10 +3,16 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.*;
 import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.jackson.JacksonFactory;
+import com.google.api.gax.paging.Page;
 import com.google.api.services.storage.StorageScopes;
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.StorageClass;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.rpc.Help;
 
 import javax.swing.*;
@@ -69,17 +75,20 @@ public class CloudStorageAPI implements IStorage {
             credentials_api = GoogleCredential.fromStream(new FileInputStream(getCredentials())).createScoped(Collections.singleton(StorageScopes.DEVSTORAGE_FULL_CONTROL));
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Sorry API mode could not be setup. Please try again later");
         }
 
         return true;
     }
 
-    public void getBucket(String name) {
+    public List<String> getBucketObjects (String name) {
+
+        List<String> objects = null;
 
         String uri;
         try {
-            uri = "https://www.googleapis.com/storage/v1/b/" + URLEncoder.encode(name, "UTF-8") + "/o";
+            uri = "https://www.googleapis.com/storage/v1/b/" + name + "/o";
+            System.out.println(uri);
 
             // Include your credentials in the Authorization header of the HTTP request
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -92,23 +101,49 @@ public class CloudStorageAPI implements IStorage {
             HttpResponse response = request.execute();
             String content = response.parseAsString();
 
-            System.out.println(content);
+            objects = parseJsonObjectList(content);
 
+            for (int i = 0; i < objects.size(); i++) {
+                System.out.println(objects.get(i));
+            }
 
-            System.out.println("---- jsonAPI ----\n");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Sorry there was an error with the url you entered");
         }
+
+        return objects;
     }
 
     @Override
     public List<String> getBucketNames() {
-        return null;
-    }
+        List<String> buckets = null;
 
-    @Override
-    public List<Bucket> getBucketList() {
-        return null;
+        String uri;
+        try {
+            uri = "https://www.googleapis.com/storage/v1/b?project=" + project_id;
+
+            // Include your credentials in the Authorization header of the HTTP request
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            HttpRequestFactory requestFactory = httpTransport.createRequestFactory(credentials_api);
+            GenericUrl url = new GenericUrl(uri);
+
+            HttpRequest request = requestFactory.buildGetRequest(url);
+
+            // Execute the HTTP request
+            HttpResponse response = request.execute();
+            String content = response.parseAsString();
+
+            buckets = parseJsonBucketList(content);
+
+            for (int i = 0; i < buckets.size(); i++) {
+                System.out.println("" + (i + 1) + ") " + buckets.get(i));
+            }
+
+        } catch (Exception e) {
+            System.out.println("Sorry bucket names could not be retrieved");
+        }
+
+        return buckets;
     }
 
     @Override
@@ -139,7 +174,6 @@ public class CloudStorageAPI implements IStorage {
             // Execute the HTTP request
             HttpResponse response = request.execute();
             String content = response.parseAsString();
-
             System.out.println("Bucket " + name + " successfully created using JSON API");
 
             addObjects(name, storageClass);
@@ -152,7 +186,6 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
-            e.printStackTrace();
         }
         return -1;
     }
@@ -161,8 +194,6 @@ public class CloudStorageAPI implements IStorage {
         String name = Helpers.getBucketNameFromUser();
         String region = Helpers.getBucketRegionFromUser();
         StorageClass storageClass = Helpers.getStorageClassFromUser();
-
-        System.out.println("Attempting to create a bucket named: " + name + " in " + region + ", storage class " + storageClass);
 
         String uri = null;
         try {
@@ -196,7 +227,6 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
-            e.printStackTrace();
         }
         return "";
     }
@@ -242,12 +272,52 @@ public class CloudStorageAPI implements IStorage {
 
     }
 
+    public boolean copyObjectToBucket(String fromBucket, String sourceObject, String destinationBucket, String destinationObject) {
+        System.out.println("Attempting to copy object: " + sourceObject + " from " + fromBucket + ", to " + destinationBucket + " and rename to: " + destinationObject);
+
+        String uri = null;
+        try {
+            uri = "https://www.googleapis.com/storage/v1/b/" + fromBucket + "/o/" + sourceObject + "/copyTo/b/" + destinationBucket + "/o/" + destinationObject;
+            System.out.println(uri);
+
+            System.out.println();
+
+            // Include your credentials in the Authorization header of the HTTP request
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            HttpRequestFactory requestFactory = httpTransport.createRequestFactory(credentials_api);
+            GenericUrl url = new GenericUrl(uri);
+
+            HashMap<String, String> object_transfer = new HashMap<>();
+
+            HttpContent httpContent = new JsonHttpContent(new JacksonFactory(), object_transfer);
+
+            HttpRequest request = requestFactory.buildPostRequest(url , httpContent);
+
+            // Execute the HTTP request
+            HttpResponse response = request.execute();
+            String content = response.parseAsString();
+
+            System.out.println("Object: " + sourceObject + " successfully copied");
+
+            return true;
+
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("Sorry the bucket name could not be encoded");
+        } catch (GeneralSecurityException e) {
+            System.out.println("Sorry there was a general security problem. Please try a different action");
+        } catch (IOException e) {
+            System.out.println("Sorry there was a file input problem. Please try again");
+        }
+        return false;
+
+    }
+
     public boolean uploadAFile(String bucketname, StorageClass storageClass, File file) {
         System.out.println("Attempting to create a object: " + file.getName() + " in " + bucketname + ", storage class " + storageClass);
 
         String uri = null;
         try {
-            uri = "https://www.googleapis.com/upload/storage/v1/b/" + URLEncoder.encode(bucketname, "UTF-8") + "/o" + "?uploadType=media&name=" + file.getName();
+            uri = "https://www.googleapis.com/storage/v1/b/sourceBucket/o/sourceObject/copyTo/b/destinationBucket/o/destinationObject";
 
             System.out.println();
 
@@ -276,13 +346,16 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
-            e.printStackTrace();
         }
         return false;
     }
 
     @Override
     public boolean deleteBucket(String bucketname) {
+
+        //Delete the contents of the bucket first
+        deleteBucketContents(bucketname);
+
         String uri = null;
         try {
             uri = "https://www.googleapis.com/storage/v1/b/" + URLEncoder.encode(bucketname, "UTF-8");
@@ -311,13 +384,18 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
-            e.printStackTrace();
         }
         return false;
     }
 
     public void deleteBucketContents(String bucketname) {
+        List<String> bucket_contents = getBucketObjects(bucketname);
 
+        //Loop through bucket objects and delete
+        for (String object : bucket_contents) {
+            System.out.println("Deleting: " + object);
+            deleteObject(bucketname, object);
+        }
     }
 
     public boolean deleteObject(String bucketname, String objectname) {
@@ -349,43 +427,82 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
-            e.printStackTrace();
         }
         return false;
     }
 
     @Override
     public boolean splitBucket() {
-        return false;
+        System.out.println("------ Split a Bucket ------");
+        List<String> buckets = getBucketNames();
+
+        if (buckets.size() < 1) {
+            System.out.println("No buckets to split, 1 bucket must exist before splitting is possible");
+            return false;
+        } else {
+            System.out.println("Please select a bucket to split");
+            int selected_bucket = Helpers.getNumericalInput(buckets.size(), 1, true) - 1;
+            System.out.println("Splitting: " + buckets.get(selected_bucket));
+
+
+            //Get the user to create two new buckets for the split
+            boolean creating_bucket1 = true;
+            String new_bucket1 = null;
+            String new_bucket2 = null;
+            while (creating_bucket1) {
+                System.out.println("Create your first bucket: ");
+                new_bucket1 = createEmptyBucket();
+                if (new_bucket1.length() > 0) {
+                    creating_bucket1 = false;
+                    boolean creating_bucket2 = true;
+                    while (creating_bucket2) {
+                        System.out.println("Create your second bucket: ");
+                        new_bucket2 = createEmptyBucket();
+                        if (new_bucket2.length() > 0) {
+                            creating_bucket2 = false;
+                        }
+                    }
+                }
+            }
+
+            //Get contents of the split bucket and ask user what to include in Bucket 1
+            String bucket = buckets.get(selected_bucket);
+            System.out.println(bucket);
+            //Get all of the contents of each bucket
+            List<String> objects = getBucketObjects(bucket);
+            for (String object : objects) {
+                List<String> options = new ArrayList<>(Arrays.asList("yes", "no"));
+                boolean validating = true;
+                String user_selection = "";
+                while (validating) {
+                    System.out.println("Would you like to add: " + object + " to " + new_bucket1 + "?");
+                    System.out.println("Type 'yes' or 'no' and hit ENTER");
+                    user_selection = Keyboard.readInput().toLowerCase();
+                    validating = !Helpers.validateStringInput(options, user_selection);
+                }
+                if (user_selection.equals("yes")) {
+                    System.out.println("Copying: " + object + " to " + new_bucket1);
+                    copyObjectToBucket(bucket, object, new_bucket1, object);
+                    System.out.println("Copied " + object + " successfully");
+                } else {
+                    System.out.println("Copying: " + object + " to " + new_bucket2);
+                    copyObjectToBucket(bucket, object, new_bucket2, object);
+                    System.out.println("Copied " + object + " successfully");
+
+                }
+            }
+
+            //Delete the initial bucket
+            System.out.println("Cleaning-up original bucket");
+            deleteBucket(bucket);
+
+            return CloudStorageJavaUI.continueMode(false);
+        }
     }
 
     @Override
     public boolean mergeBuckets() {
         return false;
-    }
-
-    private static void prettyPrintXml(final String bucketName, final String content) {
-
-        // Instantiate transformer input.
-        Source xmlInput = new StreamSource(new StringReader(content));
-        StreamResult xmlOutput = new StreamResult(new StringWriter());
-
-        // Configure transformer.
-        try {
-
-            Transformer transformer = TransformerFactory.newInstance().newTransformer(); // An identity transformer
-            transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "testing.dtd");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-            transformer.transform(xmlInput, xmlOutput);
-
-            // Pretty print the output XML.
-            System.out.println("\nBucket listing for " + bucketName + ":\n");
-            System.out.println(xmlOutput.getWriter().toString());
-        } catch (TransformerException e) {
-            e.printStackTrace();
-        }
     }
 
     private static HashMap<String, String> createBucketJson(String name, String region, StorageClass storageClass) {
@@ -397,19 +514,50 @@ public class CloudStorageAPI implements IStorage {
         return bucket_json;
     }
 
-    public static String processMD5MessageDigest(byte[] file_bytes) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            return Base64.getEncoder().encodeToString(file_bytes);
+    private static HashMap<String, String> createObjectJson(String objectName) {
+        HashMap<String, String> object_json = new HashMap<>();
 
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println("MD5 hashing algorithm not found");
+        object_json.put("kind", "storage#object");
+        object_json.put("name", objectName);
+
+        return object_json;
+    }
+
+    private static List<String> parseJsonObjectList(String jsonString) {
+        List<String> object_names = new ArrayList<>();
+
+        JsonElement responseJsonElement = new JsonParser().parse(jsonString);
+
+        JsonObject responeObject = responseJsonElement.getAsJsonObject();
+
+        JsonArray responseObjectsArray = responeObject.getAsJsonArray("items");
+
+        for (JsonElement element : responseObjectsArray) {
+            JsonObject object = element.getAsJsonObject();
+            String object_name = object.get("name").getAsString();
+            object_names.add(object_name);
         }
 
-        return "";
+        return object_names;
     }
 
-    public static void main(String[] args) {
-        System.out.println(createBucketJson("test", "testregion", StorageClass.COLDLINE));
+    private static List<String> parseJsonBucketList(String jsonString) {
+        List<String> bucket_names = new ArrayList<>();
+
+        JsonElement responseJsonElement = new JsonParser().parse(jsonString);
+
+        JsonObject responseObject = responseJsonElement.getAsJsonObject();
+
+        JsonArray responseObjectsArray = responseObject.getAsJsonArray("items");
+
+        for (JsonElement element : responseObjectsArray) {
+            JsonObject bucket = element.getAsJsonObject();
+            String bucket_name = bucket.get("name").getAsString();
+            bucket_names.add(bucket_name);
+        }
+
+        return bucket_names;
+
     }
+
 }
