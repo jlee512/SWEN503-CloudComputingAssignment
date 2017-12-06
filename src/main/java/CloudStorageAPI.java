@@ -81,7 +81,7 @@ public class CloudStorageAPI implements IStorage {
         return true;
     }
 
-    public List<String> getBucketObjects (String name) {
+    public List<String> getBucketObjects(String name) {
 
         List<String> objects = null;
 
@@ -291,7 +291,7 @@ public class CloudStorageAPI implements IStorage {
 
             HttpContent httpContent = new JsonHttpContent(new JacksonFactory(), object_transfer);
 
-            HttpRequest request = requestFactory.buildPostRequest(url , httpContent);
+            HttpRequest request = requestFactory.buildPostRequest(url, httpContent);
 
             // Execute the HTTP request
             HttpResponse response = request.execute();
@@ -372,8 +372,6 @@ public class CloudStorageAPI implements IStorage {
             // Execute the HTTP request
             HttpResponse response = request.execute();
             String content = response.parseAsString();
-            System.out.println(content);
-
             System.out.println("Bucket: " + bucketname + " successfully deleted using JSON API");
 
             return true;
@@ -401,7 +399,7 @@ public class CloudStorageAPI implements IStorage {
     public boolean deleteObject(String bucketname, String objectname) {
         String uri = null;
         try {
-            uri = "https://www.googleapis.com/storage/v1/b/" + URLEncoder.encode(bucketname, "UTF-8") +"/o/" + URLEncoder.encode(objectname, "UTF-8");
+            uri = "https://www.googleapis.com/storage/v1/b/" + URLEncoder.encode(bucketname, "UTF-8") + "/o/" + URLEncoder.encode(objectname, "UTF-8");
 
             System.out.println();
 
@@ -415,7 +413,6 @@ public class CloudStorageAPI implements IStorage {
             // Execute the HTTP request
             HttpResponse response = request.execute();
             String content = response.parseAsString();
-            System.out.println(content);
 
             System.out.println("Object: " + objectname + " successfully deleted using JSON API");
 
@@ -502,7 +499,96 @@ public class CloudStorageAPI implements IStorage {
 
     @Override
     public boolean mergeBuckets() {
-        return false;
+        System.out.println("------ Merging Buckets ------");
+        List<String> buckets = getBucketNames();
+
+        if (buckets.size() < 2) {
+            System.out.println("No buckets to merge, add at least two buckets before merging");
+            return false;
+        } else {
+            System.out.println("Please select buckets to merge:");
+            List<Integer> selected_buckets = new ArrayList<>();
+
+            boolean selecting = true;
+
+            while (selecting) {
+                System.out.println("Enter a bucket number to merge and hit ENTER");
+                int selection = Helpers.getNumericalInput(buckets.size(), 1, true) - 1;
+                if (!selected_buckets.contains(selection)) {
+                    selected_buckets.add(selection);
+                }
+
+                if (selected_buckets.size() < 2) {
+                    System.out.println("Please select another bucket");
+                } else {
+                    if (selected_buckets.size() < buckets.size()) {
+                        boolean validating = true;
+                        while (validating) {
+                            System.out.println("Add more buckets?");
+                            System.out.println("Please type 'yes' or 'no' and hit ENTER");
+                            List<String> options = new ArrayList<>(Arrays.asList("yes", "no"));
+                            String user_selection = Keyboard.readInput().toLowerCase();
+                            validating = !Helpers.validateStringInput(options, user_selection);
+                            if (!validating) {
+                                if (user_selection.equals("yes")) {
+                                    selecting = true;
+                                } else {
+                                    selecting = false;
+                                }
+                            }
+                        }
+                    } else {
+                        System.out.println("No more buckets are available");
+                        selecting = false;
+                    }
+
+                }
+            }
+
+
+            HashMap<String, List<String>> bucket_hash = new HashMap<>();
+            for (int i = 0; i < selected_buckets.size(); i++) {
+                int bucket_index = selected_buckets.get(i);
+                String bucket = buckets.get(bucket_index);
+                System.out.println("Merging: " + bucket);
+                //Get all of the contents of each bucket
+                List<String> object_names = getBucketObjects(bucket);
+                bucket_hash.put(bucket, object_names);
+            }
+
+            //Get the user to create a new bucket for the merge
+            boolean creating_bucket = true;
+            String destinationBucket = null;
+            while (creating_bucket) {
+                destinationBucket = createEmptyBucket();
+                if (destinationBucket != null) {
+                    creating_bucket = false;
+                } else {
+                    creating_bucket = true;
+                }
+            }
+
+            //For all of the Blobs, move from directories into target (i.e. copy then delete
+            System.out.println("Moving objects from merging buckets to new bucket");
+            for (Map.Entry<String, List<String>> entry : bucket_hash.entrySet()) {
+                String source_bucket = entry.getKey();
+                List<String> object_names = entry.getValue();
+
+                for (int i = 0; i < object_names.size(); i++) {
+                    copyObjectToBucket(source_bucket, object_names.get(i), destinationBucket, object_names.get(i));
+                }
+
+
+
+            }
+
+            //Delete buckets once contents have been moved
+            for (int i = 0; i < selected_buckets.size(); i++) {
+                String bucketName = buckets.get(selected_buckets.get(i));
+                deleteBucket(bucketName);
+            }
+        }
+        return CloudStorageJavaUI.continueMode(false);
     }
 
     private static HashMap<String, String> createBucketJson(String name, String region, StorageClass storageClass) {
