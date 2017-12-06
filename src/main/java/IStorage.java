@@ -16,15 +16,7 @@ public interface IStorage {
 
     public boolean setupMode();
 
-    public Bucket createEmptyBucket();
-
-    public void addObjects(Bucket bucket);
-
-    public boolean uploadAFile(Bucket bucket, File file);
-
     public boolean deleteBucket(String bucketname);
-
-    public void deleteBucketContents(Bucket bucket);
 
     public boolean splitBucket();
 

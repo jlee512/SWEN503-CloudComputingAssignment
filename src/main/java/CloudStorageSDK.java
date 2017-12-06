@@ -87,7 +87,7 @@ public class CloudStorageSDK implements IStorage {
         String region = Helpers.getBucketRegionFromUser();
         StorageClass storageClass = Helpers.getStorageClassFromUser();
 
-        System.out.println("Attempting to create a bucket named: " + name + " in " + region);
+        System.out.println("Attempting to create a bucket named: " + name + " in " + region + ", storage class " + storageClass);
 
         try {
             Bucket bucket = storage.create(BucketInfo.newBuilder(name)
@@ -96,7 +96,7 @@ public class CloudStorageSDK implements IStorage {
                     // Possible values: http://g.co/cloud/storage/docs/bucket-locations#location-mr
                     .setLocation(region)
                     .build());
-            System.out.printf("\tBucket %s created.%n", bucket.getName() + " in " + region);
+            System.out.printf("\tBucket %s created.%n", bucket.getName() + " in " + region + ", storage class " + storageClass);
 
             addObjects(bucket);
 
@@ -107,14 +107,13 @@ public class CloudStorageSDK implements IStorage {
         return -1;
     }
 
-    @Override
     public Bucket createEmptyBucket() {
 
         String name = Helpers.getBucketNameFromUser();
         String region = Helpers.getBucketRegionFromUser();
         StorageClass storageClass = Helpers.getStorageClassFromUser();
 
-        System.out.println("Attempting to create a bucket named: " + name + " in " + region);
+        System.out.println("Attempting to create a bucket named: " + name + " in " + region + ", storage class " + storageClass);
 
         try {
             Bucket bucket = storage.create(BucketInfo.newBuilder(name)
@@ -123,7 +122,7 @@ public class CloudStorageSDK implements IStorage {
                     // Possible values: http://g.co/cloud/storage/docs/bucket-locations#location-mr
                     .setLocation(region)
                     .build());
-            System.out.printf("\tBucket %s created.%n", bucket.getName() + " in " + region);
+            System.out.printf("\tBucket %s created.%n", bucket.getName() + " in " + region + ", storage class " + storageClass);
 
 
             return bucket;
@@ -133,7 +132,6 @@ public class CloudStorageSDK implements IStorage {
         return null;
     }
 
-    @Override
     public void addObjects(Bucket bucket) {
 
         List<String> valid_inputs = new ArrayList<>();
@@ -174,7 +172,6 @@ public class CloudStorageSDK implements IStorage {
         }
     }
 
-    @Override
     public boolean uploadAFile(Bucket bucket, File file) {
 
         String blobName = file.getName();
@@ -211,7 +208,6 @@ public class CloudStorageSDK implements IStorage {
         return true;
     }
 
-    @Override
     public void deleteBucketContents(Bucket bucket) {
         Page<Blob> blobs = bucket.list();
         for (Blob blob : blobs.iterateAll()) {

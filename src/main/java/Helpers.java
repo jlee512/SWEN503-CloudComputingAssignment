@@ -106,7 +106,7 @@ public class Helpers {
         for (int i = 0; i < STORAGE_CLASSES.size(); i++) {
             System.out.println("" + (i + 1) + ") " + STORAGE_CLASSES.get(i).name());
         }
-        System.out.println("Please type the number of the region you would like and hit ENTER");
+        System.out.println("Please type the number of the storage class you would like and hit ENTER");
 
         int selection = Helpers.getNumericalInput(STORAGE_CLASSES.size(), 1, true);
 
