@@ -283,11 +283,75 @@ public class CloudStorageAPI implements IStorage {
 
     @Override
     public boolean deleteBucket(String bucketname) {
+        String uri = null;
+        try {
+            uri = "https://www.googleapis.com/storage/v1/b/" + URLEncoder.encode(bucketname, "UTF-8");
+
+            System.out.println();
+
+            // Include your credentials in the Authorization header of the HTTP request
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            HttpRequestFactory requestFactory = httpTransport.createRequestFactory(credentials_api);
+            GenericUrl url = new GenericUrl(uri);
+
+            HttpRequest request = requestFactory.buildDeleteRequest(url);
+
+            // Execute the HTTP request
+            HttpResponse response = request.execute();
+            String content = response.parseAsString();
+            System.out.println(content);
+
+            System.out.println("Bucket: " + bucketname + " successfully deleted using JSON API");
+
+            return true;
+
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("Sorry the bucket name could not be encoded");
+        } catch (GeneralSecurityException e) {
+            System.out.println("Sorry there was a general security problem. Please try a different action");
+        } catch (IOException e) {
+            System.out.println("Sorry there was a file input problem. Please try again");
+            e.printStackTrace();
+        }
         return false;
     }
 
     public void deleteBucketContents(String bucketname) {
 
+    }
+
+    public boolean deleteObject(String bucketname, String objectname) {
+        String uri = null;
+        try {
+            uri = "https://www.googleapis.com/storage/v1/b/" + URLEncoder.encode(bucketname, "UTF-8") +"/o/" + URLEncoder.encode(objectname, "UTF-8");
+
+            System.out.println();
+
+            // Include your credentials in the Authorization header of the HTTP request
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            HttpRequestFactory requestFactory = httpTransport.createRequestFactory(credentials_api);
+            GenericUrl url = new GenericUrl(uri);
+
+            HttpRequest request = requestFactory.buildDeleteRequest(url);
+
+            // Execute the HTTP request
+            HttpResponse response = request.execute();
+            String content = response.parseAsString();
+            System.out.println(content);
+
+            System.out.println("Object: " + objectname + " successfully deleted using JSON API");
+
+            return true;
+
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("Sorry the bucket name could not be encoded");
+        } catch (GeneralSecurityException e) {
+            System.out.println("Sorry there was a general security problem. Please try a different action");
+        } catch (IOException e) {
+            System.out.println("Sorry there was a file input problem. Please try again");
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override
