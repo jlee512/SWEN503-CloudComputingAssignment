@@ -1,3 +1,5 @@
+package RegularProject;
+
 /**
  * Created by Julian on 5/12/2017.
  */

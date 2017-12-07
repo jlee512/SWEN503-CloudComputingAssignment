@@ -1,3 +1,5 @@
+package RegularProject;
+
 import com.google.cloud.storage.StorageClass;
 
 import java.io.File;

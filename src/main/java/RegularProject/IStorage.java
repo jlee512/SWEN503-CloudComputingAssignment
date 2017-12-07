@@ -1,3 +1,5 @@
+package RegularProject;
+
 import com.google.cloud.storage.Bucket;
 
 import java.io.File;
@@ -19,4 +21,6 @@ public interface IStorage {
     public boolean splitBucket();
 
     public boolean mergeBuckets();
+
+    public boolean downloadFile();
 }

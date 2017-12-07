@@ -1,29 +1,21 @@
+package RegularProject;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.*;
 import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.jackson.JacksonFactory;
-import com.google.api.gax.paging.Page;
 import com.google.api.services.storage.StorageScopes;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.CopyWriter;
 import com.google.cloud.storage.StorageClass;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.rpc.Help;
 
 import javax.swing.*;
-import javax.xml.transform.*;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -54,7 +46,7 @@ public class CloudStorageAPI implements IStorage {
     public static List<StorageClass> storage_classes = new ArrayList<>(Arrays.asList(StorageClass.COLDLINE, StorageClass.DURABLE_REDUCED_AVAILABILITY, StorageClass.MULTI_REGIONAL, StorageClass.NEARLINE, StorageClass.REGIONAL, StorageClass.STANDARD));
 
 
-    CloudStorageAPI(String credentials, String project_id) {
+    public CloudStorageAPI(String credentials, String project_id) {
         this.credentials = credentials;
         this.project_id = project_id;
 
@@ -100,14 +92,17 @@ public class CloudStorageAPI implements IStorage {
             // Execute the HTTP request
             HttpResponse response = request.execute();
             String content = response.parseAsString();
-
             objects = parseJsonObjectList(content);
 
             for (int i = 0; i < objects.size(); i++) {
                 System.out.println(objects.get(i));
             }
 
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
+            System.out.println("Sorry there was no items in the bucket");
+            return new ArrayList<>();
+        }
+        catch (Exception e) {
             System.out.println("Sorry there was an error with the url you entered");
         }
 
@@ -149,6 +144,7 @@ public class CloudStorageAPI implements IStorage {
     @Override
     public int createBucket() {
 
+        HttpResponse response = null;
         String name = Helpers.getBucketNameFromUser();
         String region = Helpers.getBucketRegionFromUser();
         StorageClass storageClass = Helpers.getStorageClassFromUser();
@@ -172,7 +168,8 @@ public class CloudStorageAPI implements IStorage {
 
 
             // Execute the HTTP request
-            HttpResponse response = request.execute();
+            response = request.execute();
+
             String content = response.parseAsString();
             System.out.println("Bucket " + name + " successfully created using JSON API");
 
@@ -186,11 +183,15 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
+
         }
         return -1;
     }
 
     public String createEmptyBucket() {
+
+        HttpResponse response = null;
+
         String name = Helpers.getBucketNameFromUser();
         String region = Helpers.getBucketRegionFromUser();
         StorageClass storageClass = Helpers.getStorageClassFromUser();
@@ -214,7 +215,7 @@ public class CloudStorageAPI implements IStorage {
 
 
             // Execute the HTTP request
-            HttpResponse response = request.execute();
+            response = request.execute();
             String content = response.parseAsString();
 
             System.out.println("Bucket " + name + " successfully created using JSON API");
@@ -227,6 +228,7 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
+
         }
         return "";
     }
@@ -275,6 +277,7 @@ public class CloudStorageAPI implements IStorage {
     public boolean copyObjectToBucket(String fromBucket, String sourceObject, String destinationBucket, String destinationObject) {
         System.out.println("Attempting to copy object: " + sourceObject + " from " + fromBucket + ", to " + destinationBucket + " and rename to: " + destinationObject);
 
+        HttpResponse response = null;
         String uri = null;
         try {
             uri = "https://www.googleapis.com/storage/v1/b/" + fromBucket + "/o/" + sourceObject + "/copyTo/b/" + destinationBucket + "/o/" + destinationObject;
@@ -294,7 +297,7 @@ public class CloudStorageAPI implements IStorage {
             HttpRequest request = requestFactory.buildPostRequest(url, httpContent);
 
             // Execute the HTTP request
-            HttpResponse response = request.execute();
+            response = request.execute();
             String content = response.parseAsString();
 
             System.out.println("Object: " + sourceObject + " successfully copied");
@@ -307,6 +310,9 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
+            System.out.println("Sorry there was a file input problem. Please try again");
+
+
         }
         return false;
 
@@ -315,6 +321,7 @@ public class CloudStorageAPI implements IStorage {
     public boolean uploadAFile(String bucketname, StorageClass storageClass, File file) {
         System.out.println("Attempting to create a object: " + file.getName() + " in " + bucketname + ", storage class " + storageClass);
 
+        HttpResponse response = null;
         String uri = null;
         try {
             uri = "https://www.googleapis.com/upload/storage/v1/b/" + bucketname + "/o?uploadType=media&name=" + file.getName();
@@ -333,9 +340,8 @@ public class CloudStorageAPI implements IStorage {
             HttpRequest request = requestFactory.buildPostRequest(url, httpContent);
 
             // Execute the HTTP request
-            HttpResponse response = request.execute();
+            response = request.execute();
             String content = response.parseAsString();
-            System.out.println(content);
 
             System.out.println("Object: " + file.getName() + " successfully created using JSON API");
 
@@ -347,7 +353,8 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
-            e.printStackTrace();
+
+
         }
         return false;
     }
@@ -359,6 +366,7 @@ public class CloudStorageAPI implements IStorage {
         deleteBucketContents(bucketname);
 
         String uri = null;
+        HttpResponse response = null;
         try {
             uri = "https://www.googleapis.com/storage/v1/b/" + URLEncoder.encode(bucketname, "UTF-8");
 
@@ -372,7 +380,7 @@ public class CloudStorageAPI implements IStorage {
             HttpRequest request = requestFactory.buildDeleteRequest(url);
 
             // Execute the HTTP request
-            HttpResponse response = request.execute();
+            response = request.execute();
             String content = response.parseAsString();
             System.out.println("Bucket: " + bucketname + " successfully deleted using JSON API");
 
@@ -384,6 +392,7 @@ public class CloudStorageAPI implements IStorage {
             System.out.println("Sorry there was a general security problem. Please try a different action");
         } catch (IOException e) {
             System.out.println("Sorry there was a file input problem. Please try again");
+
         }
         return false;
     }
@@ -636,15 +645,67 @@ public class CloudStorageAPI implements IStorage {
 
         JsonObject responseObject = responseJsonElement.getAsJsonObject();
 
-        JsonArray responseObjectsArray = responseObject.getAsJsonArray("items");
+        if (responseObject.has("items")) {
+            JsonArray responseObjectsArray = responseObject.getAsJsonArray("items");
 
-        for (JsonElement element : responseObjectsArray) {
-            JsonObject bucket = element.getAsJsonObject();
-            String bucket_name = bucket.get("name").getAsString();
-            bucket_names.add(bucket_name);
+            for (JsonElement element : responseObjectsArray) {
+                JsonObject bucket = element.getAsJsonObject();
+                String bucket_name = bucket.get("name").getAsString();
+                bucket_names.add(bucket_name);
+            }
+        } else {
+            return new ArrayList<>();
         }
 
         return bucket_names;
+
+    }
+
+    @Override
+    public boolean downloadFile() {
+
+        //Hardcoded during examination conditions - flexibilty can be added at a later stage
+        //Note: this bucket-name exists in Julian's google cloud storage console, please change the name and filename accordingly
+        String bucketname = "dion-split-105";
+        String objectname = "cloud.txt";
+
+        System.out.println("Attempting to get object: " + objectname + " from " + bucketname);
+
+        HttpResponse response = null;
+        String uri = null;
+        try {
+            uri = "https://www.googleapis.com/storage/v1/b/" + bucketname + "/o/" + objectname + "?alt=media";
+            System.out.println(uri);
+
+            System.out.println();
+
+            // Include your credentials in the Authorization header of the HTTP request
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            HttpRequestFactory requestFactory = httpTransport.createRequestFactory(credentials_api);
+            GenericUrl url = new GenericUrl(uri);
+
+            HttpRequest request = requestFactory.buildGetRequest(url);
+
+            // Execute the HTTP request
+            response = request.execute();
+            //Content returned is the file content (i.e. the text file content)
+            String content = response.parseAsString();
+            System.out.println(content);
+
+            System.out.println("Object: " + objectname + " successfully downloaded using JSON API");
+
+            return true;
+
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("Sorry the bucket name could not be encoded");
+        } catch (GeneralSecurityException e) {
+            System.out.println("Sorry there was a general security problem. Please try a different action");
+        } catch (IOException e) {
+            System.out.println("Sorry there was a file input problem. Please try again");
+
+
+        }
+        return false;
 
     }
 

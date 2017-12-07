@@ -1,9 +1,11 @@
+package RegularProject;
+
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /*
- * CompSci 101 - Keyboard Class
+ * CompSci 101 - RegularProject.Keyboard Class
          * ============================
          * Version 4th March, 2011
          */
@@ -19,7 +21,7 @@ public class Keyboard {
                 redirected = System.in.available() != 0;
             }
         } catch (IOException e) {
-            System.err.println("An error has occurred in the Keyboard constructor.");
+            System.err.println("An error has occurred in the RegularProject.Keyboard constructor.");
             e.printStackTrace();
             System.exit(-1);
         }
@@ -33,7 +35,7 @@ public class Keyboard {
         } catch (NoSuchElementException e) {
             return null; // End of file
         } catch (IllegalStateException e) {
-            System.err.println("An error has occurred in the Keyboard.readInput() method.");
+            System.err.println("An error has occurred in the RegularProject.Keyboard.readInput() method.");
             e.printStackTrace();
             System.exit(-1);
         }

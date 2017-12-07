@@ -1,3 +1,5 @@
+package RegularProject;
+
 import com.google.api.gax.paging.Page;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.storage.*;
@@ -371,6 +373,11 @@ public class CloudStorageSDK implements IStorage {
 
             return CloudStorageJavaUI.continueMode(false);
         }
+    }
+
+    @Override
+    public boolean downloadFile() {
+        return true;
     }
 
 

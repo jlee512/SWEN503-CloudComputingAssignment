@@ -1,3 +1,5 @@
+package RegularProject;
+
 import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -51,7 +53,7 @@ public class CloudStorageJavaUI {
 
     }
 
-    static int setupSelectedMode (IStorage mode) {
+    public static int setupSelectedMode (IStorage mode) {
         boolean continue_sdk_mode = true;
         int status_code = -1;
 
@@ -63,8 +65,9 @@ public class CloudStorageJavaUI {
                 System.out.println("----- Split -----");
                 System.out.println("----- Merge -----");
                 System.out.println("----- Create -----");
+                System.out.println("----- Download File -----");
                 System.out.println("--- Exit SDK Mode ---");
-                System.out.println("Type 'split', 'merge', 'create' or 'exit' and hit ENTER");
+                System.out.println("Type 'split', 'merge', 'create', 'download' or 'exit' and hit ENTER");
 
                 String user_choice = Keyboard.readInput().toLowerCase();
                 boolean choice_validation = Helpers.validateStringInput(options, user_choice);
@@ -79,6 +82,9 @@ public class CloudStorageJavaUI {
                             break;
                         case "merge":
                             continue_sdk_mode = mode.mergeBuckets();
+                            break;
+                        case "download":
+                            continue_sdk_mode = mode.downloadFile();
                             break;
                         case "exit":
                             continue_sdk_mode = false;
@@ -138,7 +144,7 @@ public class CloudStorageJavaUI {
 
     }
 
-    static String getCredentialsJSONPath() {
+    public static String getCredentialsJSONPath() {
 
         boolean json_file_selected = false;
 
@@ -162,7 +168,7 @@ public class CloudStorageJavaUI {
         return null;
     }
 
-    static String getProjectId() {
+    public static String getProjectId() {
 
         boolean project_id_entered = false;
 
